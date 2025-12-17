@@ -39,7 +39,7 @@ class MusicalTheory:
     
     def _initialize_key_signatures(self) -> Dict[str, List[str]]:
         """Initialize key signature to accidentals mapping."""
-        # TODO: Implement complete key signature mappings
+    
         return {
             # Major keys with sharps
             "C major": [],
@@ -140,10 +140,24 @@ class MusicalTheory:
         # Base chromatic scale
         chromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-        # Major scale pattern: W-W-H-W-W-W-H (whole-whole-half steps)
+        # Major scale pattern: T-T-S-T-T-T-S (tone-tone-semitone steps)
         major_intervals = [0, 2, 4, 5, 7, 9, 11]
-        pass
-    
-
-testp = MusicalTheory()
-print(testp.major_to_minor(KeySignature.F_SHARP_MAJOR))
+        major_root = key.value.split(" ")[0]
+        
+          # Handle accidentals in root
+        if '#' in major_root:
+            root_index = chromatic.index(major_root)
+        elif 'b' in major_root:
+            # Convert flat to sharp equivalent
+            flat_to_sharp = {'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#', 'Cb': 'B'}
+            root_index = chromatic.index(flat_to_sharp.get(major_root, major_root))
+        else:
+            root_index = chromatic.index(major_root)
+        
+        # Generate scale using intervals
+        scale_notes = []
+        for interval in major_intervals:
+            note_index = (root_index + interval) % 12
+            note = chromatic[note_index]
+            scale_notes.append(note)
+        return scale_notes
