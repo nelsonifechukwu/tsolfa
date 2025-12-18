@@ -7,11 +7,11 @@ from dataclasses import dataclass
 @dataclass
 class TranscriptionResult:
     """Result of sheet music transcription."""
-    solfa_notation: List[str]
-    key_signature: str
-    time_signature: Tuple[int, int]
-    confidence_score: float
-    processing_time: float
+    solfa_notation: List[str] = None
+    key_signature: str = ""
+    time_signature: Tuple[int, int] = ()
+    confidence_score: float = 0.0
+    processing_time: float = 0.0
 
 
 class SheetTranscriber:
@@ -34,7 +34,10 @@ class SheetTranscriber:
             TranscriptionResult with solfa notation and metadata
         """
         # TODO: Implement full transcription pipeline
-        pass
+        import cv2
+        img = cv2.imread(image_path)
+        cv2.imshow("Music sheet", img)
+        cv2.waitKey(0)
     
     def transcribe_batch(self, image_paths: List[str]) -> List[TranscriptionResult]:
         """
@@ -47,4 +50,11 @@ class SheetTranscriber:
             List of TranscriptionResult objects
         """
         # TODO: Implement batch processing
-        pass
+        
+    
+eg_obj = TranscriptionResult()
+print(eg_obj)
+    
+
+mysheet = SheetTranscriber()     
+mysheet.transcribe("sheet.png")
