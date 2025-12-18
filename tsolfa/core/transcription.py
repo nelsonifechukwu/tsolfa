@@ -2,16 +2,17 @@
 
 from typing import List, Dict, Optional, Tuple
 import numpy as np
+import matplotlib.pyplot as plt 
 from dataclasses import dataclass
 
 @dataclass
 class TranscriptionResult:
     """Result of sheet music transcription."""
-    solfa_notation: List[str]
-    key_signature: str
-    time_signature: Tuple[int, int]
-    confidence_score: float
-    processing_time: float
+    solfa_notation: List[str] = None
+    key_signature: str = ""
+    time_signature: Tuple[int, int] = ()
+    confidence_score: float = 0.0
+    processing_time: float = 0.0
 
 
 class SheetTranscriber:
@@ -33,9 +34,71 @@ class SheetTranscriber:
         Returns:
             TranscriptionResult with solfa notation and metadata
         """
-        # TODO: Implement full transcription pipeline
-        pass
+        import cv2
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        _, binary = cv2.threshold(img, 200, 255,  cv2.THRESH_BINARY)
+        # cv2.imshow("Grayscale", img)
+        # cv2.imshow("Binary", binary)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        self._detect_staff_lines(binary)
+
+    def _detect_staff_lines(self, binary_img):
+        """
+        Detect staff lines from binary image.
+        
+        Returns:
+            list of y-coordinates for each staff line
+        """
+        height, width = binary_img.shape
+        
+        # Count black pixels (value 0) in each row
+        row_black_counts = []
+        for y in range(height):
+            row = binary_img[y, :]
+            black_count = np.sum(row==0)  # count pixels that equal 0
+            row_black_counts.append(black_count)
+        
+        # let's visualize where staff lines are
+        staff_line_threshold = width * 0.5 #staff lines span > 0.5 width
+        staff_line_rows = [y for y, black_count in enumerate(row_black_counts) if black_count > staff_line_threshold]
+        
+        #group consecutive rows into single lines
+        # Example: rows [100,101,102] become single line at y=101
+        main_staff_lines = []
+        if staff_line_rows:
+            group_start = staff_line_rows[0]
+            prev_y = staff_line_rows[0]
+            
+            for y in staff_line_rows[1:]:
+                if y - prev_y > 1:  # gap means new line 
+                    
+                    # End current group, save center position
+                    center = (group_start + prev_y) // 2
+                    main_staff_lines.append(center)
+                    group_start = y
+                prev_y = y
+            
+            # Don't forget the last group!
+            center = (group_start + prev_y) // 2
+            main_staff_lines.append(center)
     
+        pass
+        # Create an array of zeros for the full image height
+        staff_line_plot = np.zeros(height)
+
+        # Mark only the detected staff line positions with their counts
+        for y in main_staff_lines:
+            staff_line_plot[y] = row_black_counts[y]
+
+        plt.figure(figsize=(10, 5))
+        plt.plot(staff_line_plot)
+        plt.xlabel("Img height/Row (y-coordinate)")
+        plt.ylabel("Black pixel count")
+        plt.title("Detected Staff Lines")
+        plt.show()
+        return staff_line_plot  # we'll process this next
+        
     def transcribe_batch(self, image_paths: List[str]) -> List[TranscriptionResult]:
         """
         Transcribe multiple sheet music images in batch.
@@ -47,4 +110,7 @@ class SheetTranscriber:
             List of TranscriptionResult objects
         """
         # TODO: Implement batch processing
-        pass
+        
+
+mysheet = SheetTranscriber()     
+mysheet.transcribe("/Users/elijahnelson/Desktop/PROJECTS/tsolfa/sheet.png")

@@ -137,27 +137,23 @@ class MusicalTheory:
         Returns:
             List of note names in the scale
         """
-        # Base chromatic scale
-        chromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-
-        # Major scale pattern: T-T-S-T-T-T-S (tone-tone-semitone steps)
-        major_intervals = [0, 2, 4, 5, 7, 9, 11]
+        # Base scale
+        base_scale = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
+        base_scale_length = len(base_scale)
         major_root = key.value.split(" ")[0]
-        
-          # Handle accidentals in root
-        if '#' in major_root:
-            root_index = chromatic.index(major_root)
-        elif 'b' in major_root:
-            # Convert flat to sharp equivalent
-            flat_to_sharp = {'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#', 'Cb': 'B'}
-            root_index = chromatic.index(flat_to_sharp.get(major_root, major_root))
-        else:
-            root_index = chromatic.index(major_root)
-        
-        # Generate scale using intervals
         scale_notes = []
-        for interval in major_intervals:
-            note_index = (root_index + interval) % 12
-            note = chromatic[note_index]
-            scale_notes.append(note)
+        start_note_pos = base_scale.index(major_root[0])
+        for i in range(base_scale_length): 
+            scale_notes.append(base_scale[(start_note_pos+i) % base_scale_length])
+            
+        #apply the accidentals per the key
+        accidentals = self.key_signatures_map[key.value]
+        for each_note in accidentals:
+            note = each_note[0]
+            scale_notes[scale_notes.index(note)] = each_note
         return scale_notes
+
+theory = MusicalTheory()
+for key in KeySignature:
+    minor_key = theory._major_to_minor(key)
+    print(f"{key.value} -> {minor_key}: {theory.get_scale_degrees(key)}")
