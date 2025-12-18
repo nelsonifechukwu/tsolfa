@@ -2,6 +2,7 @@
 
 from typing import List, Dict, Optional, Tuple
 import numpy as np
+import matplotlib.pyplot as plt 
 from dataclasses import dataclass
 
 @dataclass
@@ -33,12 +34,44 @@ class SheetTranscriber:
         Returns:
             TranscriptionResult with solfa notation and metadata
         """
-        # TODO: Implement full transcription pipeline
         import cv2
-        img = cv2.imread(image_path)
-        cv2.imshow("Music sheet", img)
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        _, binary = cv2.threshold(img, 200, 255,  cv2.THRESH_BINARY)
+        cv2.imshow("Grayscale", img)
+        cv2.imshow("Binary", binary)
         cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        self.detect_staff_lines(binary)
+
+    def detect_staff_lines(self, binary_img):
+        """
+        Detect staff lines from binary image.
+        
+        Returns:
+            list of y-coordinates for each staff line
+        """
+        height, width = binary_img.shape
+        
+        # Count black pixels (value 0) in each row
+        # Hint: black pixels are 0, so we need to count where pixels are NOT 255
+        row_black_counts = []
+        for y in range(height):
+            row = binary_img[y, :]
+            black_count = np.sum(row==0)  # count pixels that equal 0
+            row_black_counts.append(black_count)
+        
+        # For now, let's visualize this as a graph
+        # This helps us see where staff lines are
+
+        plt.figure(figsize=(10, 5))
+        plt.plot(row_black_counts)
+        plt.xlabel("Img height/Row")
+        plt.ylabel("Black pixel count")
+        plt.title("Horizontal Projection")
+        plt.show()
     
+        return row_black_counts  # we'll process this next
+        
     def transcribe_batch(self, image_paths: List[str]) -> List[TranscriptionResult]:
         """
         Transcribe multiple sheet music images in batch.
@@ -51,10 +84,6 @@ class SheetTranscriber:
         """
         # TODO: Implement batch processing
         
-    
-eg_obj = TranscriptionResult()
-print(eg_obj)
-    
 
 mysheet = SheetTranscriber()     
-mysheet.transcribe("sheet.png")
+mysheet.transcribe("/Users/elijahnelson/Desktop/PROJECTS/tsolfa/sheet.png")
