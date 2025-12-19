@@ -1,5 +1,5 @@
 # tsolfa
-scan and see the tonic solfa of any music sheet
+scan and see the tonic solfa of any music sheet (that's black and white)
 
 ## TODOS
 - Read img

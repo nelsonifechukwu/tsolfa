@@ -2,6 +2,7 @@
 
 from typing import List, Dict, Optional, Tuple
 import numpy as np
+import cv2
 import matplotlib.pyplot as plt 
 from dataclasses import dataclass
 
@@ -34,14 +35,20 @@ class SheetTranscriber:
         Returns:
             TranscriptionResult with solfa notation and metadata
         """
-        import cv2
+
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        _, binary = cv2.threshold(img, 200, 255,  cv2.THRESH_BINARY)
+        # img = cv2.medianBlur(img,9) -> for img with different lightning conditions
+        #_, binary3 = cv2.threshold(img, 200, 255,  cv2.THRESH_BINARY)
+        #binary2 = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        
+        _,binary = cv2.threshold(img,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        
         # cv2.imshow("Grayscale", img)
         # cv2.imshow("Binary", binary)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
-        self._detect_staff_lines(binary)
+        _ , main_staff_lines = self._detect_staff_lines(binary)
+        _ = self._remove_staff_lines(binary, main_staff_lines)
 
     def _detect_staff_lines(self, binary_img):
         """
@@ -73,30 +80,59 @@ class SheetTranscriber:
             for y in staff_line_rows[1:]:
                 if y - prev_y > 1:  # gap means new line    
                     # End current group, save center position
+                    line_thickness = prev_y - group_start
                     center = (group_start + prev_y) // 2
-                    main_staff_lines.append(center)
+                    main_staff_lines.append((center, line_thickness))
                     group_start = y
                 prev_y = y
             
             # Don't forget the last group!
+            line_thickness = prev_y - group_start
             center = (group_start + prev_y) // 2
-            main_staff_lines.append(center)
+            main_staff_lines.append((center, line_thickness))
     
     
         # Create an array of zeros for the full image height
         staff_line_plot = np.zeros(height)
         # Mark only the detected staff line positions with their counts
-        for y in main_staff_lines:
+        for y, _ in main_staff_lines:
             staff_line_plot[y] = row_black_counts[y]
 
-        plt.figure(figsize=(10, 5))
-        plt.plot(staff_line_plot)
-        plt.xlabel("Img height/Row (y-coordinate)")
-        plt.ylabel("Black pixel count")
-        plt.title("Detected Staff Lines")
-        plt.show()
-        return staff_line_plot  # we'll process this next
+        # plt.figure(figsize=(10, 5))
+        # plt.plot(staff_line_plot)
+        # plt.xlabel("Img height/Row (y-coordinate)")
+        # plt.ylabel("Black pixel count")
+        # plt.title("Detected Staff Lines")
+        # plt.show()
+        return staff_line_plot, main_staff_lines  # we'll process this next
         
+    def _remove_staff_lines(self, binary_img, staff_lines):
+        """
+        Remove staff lines from image to isolate notes.
+        
+        Args:
+            binary_img: Binary image
+            staff_lines: List of y-coordinates of staff line centers
+            line_thickness: How many pixels above/below center to remove
+        
+        Returns:
+            Image with staff lines removed
+        """
+        # Make a copy so we don't modify the original
+        img_no_lines = binary_img.copy()
+        
+        for y, line_thickness in staff_lines:
+            # Set rows around each staff line to white (255)
+            y_start = y-(line_thickness//2)
+            y_end = y+(line_thickness//2)+1
+            img_no_lines[y_start:y_end, :] = 255
+        
+        cv2.imshow("Sheet w/o lines", img_no_lines)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        
+        return img_no_lines
+            
     def transcribe_batch(self, image_paths: List[str]) -> List[TranscriptionResult]:
         """
         Transcribe multiple sheet music images in batch.
@@ -111,4 +147,4 @@ class SheetTranscriber:
         
 
 mysheet = SheetTranscriber()     
-mysheet.transcribe("/Users/elijahnelson/Desktop/PROJECTS/tsolfa/sheet.png")
+mysheet.transcribe("/Users/elijahnelson/Desktop/PROJECTS/tsolfa/tsolfa/data/sheets/sheet.png")
