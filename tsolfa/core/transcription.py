@@ -70,34 +70,28 @@ class SheetTranscriber:
         staff_line_threshold = width * 0.5 #staff lines span > 0.5 width
         staff_line_rows = [y for y, black_count in enumerate(row_black_counts) if black_count > staff_line_threshold]
         
-        #group consecutive rows into single lines
-        #Example: rows [100,101,102] become single line at y=101
+        #group consecutive rows Example: rows [100,101,102], store (start, end)
         main_staff_lines = []
         if staff_line_rows:
             group_start = staff_line_rows[0]
             prev_y = staff_line_rows[0]
-            
             for y in staff_line_rows[1:]:
-                if y - prev_y > 1:  # gap means new line    
-                    # End current group, save center position
-                    line_thickness = prev_y - group_start
-                    center = (group_start + prev_y) // 2
-                    main_staff_lines.append((center, line_thickness))
+                if y - prev_y > 1:
+                    main_staff_lines.append((group_start, prev_y))
                     group_start = y
                 prev_y = y
             
-            # Don't forget the last group!
-            line_thickness = prev_y - group_start
-            center = (group_start + prev_y) // 2
-            main_staff_lines.append((center, line_thickness))
+            # Last group
+            main_staff_lines.append((group_start, prev_y))
     
     
-        # Create an array of zeros for the full image height
         staff_line_plot = np.zeros(height)
-        # Mark only the detected staff line positions with their counts
-        for y, _ in main_staff_lines:
-            staff_line_plot[y] = row_black_counts[y]
+        for y_start, y_end in main_staff_lines:
+            # Fill the entire range of the staff line
+            for y in range(y_start, y_end + 1):
+                staff_line_plot[y] = row_black_counts[y]
 
+        # print(main_staff_lines)
         # plt.figure(figsize=(10, 5))
         # plt.plot(staff_line_plot)
         # plt.xlabel("Img height/Row (y-coordinate)")
@@ -120,12 +114,8 @@ class SheetTranscriber:
         """
         # Make a copy so we don't modify the original
         img_no_lines = binary_img.copy()
-        
-        for y, line_thickness in staff_lines:
-            # Set rows around each staff line to white (255)
-            y_start = y-(line_thickness//2)
-            y_end = y+(line_thickness//2)+1
-            img_no_lines[y_start:y_end, :] = 255
+        for y_start, y_end in staff_lines:
+            img_no_lines[y_start:y_end + 1, :] = 255  # +1 because slicing is exclusive
         
         cv2.imshow("Sheet w/o lines", img_no_lines)
         cv2.waitKey(0)
@@ -147,4 +137,4 @@ class SheetTranscriber:
         
 
 mysheet = SheetTranscriber()     
-mysheet.transcribe("/Users/elijahnelson/Desktop/PROJECTS/tsolfa/tsolfa/data/sheets/sheet.png")
+mysheet.transcribe("/Users/elijahnelson/Desktop/PROJECTS/tsolfa/tsolfa/data/sheets/image3.png")
