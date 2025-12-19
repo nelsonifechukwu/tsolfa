@@ -80,20 +80,22 @@ class SheetTranscriber:
             for y in staff_line_rows[1:]:
                 if y - prev_y > 1:  # gap means new line    
                     # End current group, save center position
+                    line_thickness = prev_y - group_start
                     center = (group_start + prev_y) // 2
-                    main_staff_lines.append(center)
+                    main_staff_lines.append((center, line_thickness))
                     group_start = y
                 prev_y = y
             
             # Don't forget the last group!
+            line_thickness = prev_y - group_start
             center = (group_start + prev_y) // 2
-            main_staff_lines.append(center)
+            main_staff_lines.append((center, line_thickness))
     
     
         # Create an array of zeros for the full image height
         staff_line_plot = np.zeros(height)
         # Mark only the detected staff line positions with their counts
-        for y in main_staff_lines:
+        for y, _ in main_staff_lines:
             staff_line_plot[y] = row_black_counts[y]
 
         # plt.figure(figsize=(10, 5))
@@ -104,7 +106,7 @@ class SheetTranscriber:
         # plt.show()
         return staff_line_plot, main_staff_lines  # we'll process this next
         
-    def _remove_staff_lines(self, binary_img, staff_lines, line_thickness=0):
+    def _remove_staff_lines(self, binary_img, staff_lines):
         """
         Remove staff lines from image to isolate notes.
         
@@ -119,10 +121,10 @@ class SheetTranscriber:
         # Make a copy so we don't modify the original
         img_no_lines = binary_img.copy()
         
-        for y in staff_lines:
+        for y, line_thickness in staff_lines:
             # Set rows around each staff line to white (255)
-            y_start = y-line_thickness
-            y_end = y+line_thickness+1
+            y_start = y-(line_thickness//2)
+            y_end = y+(line_thickness//2)+1
             img_no_lines[y_start:y_end, :] = 255
         
         cv2.imshow("Sheet w/o lines", img_no_lines)
@@ -145,4 +147,4 @@ class SheetTranscriber:
         
 
 mysheet = SheetTranscriber()     
-mysheet.transcribe("/Users/elijahnelson/Desktop/PROJECTS/tsolfa/tsolfa/data/sheets/image2.png")
+mysheet.transcribe("/Users/elijahnelson/Desktop/PROJECTS/tsolfa/tsolfa/data/sheets/sheet.png")
