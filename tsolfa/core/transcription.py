@@ -64,15 +64,14 @@ class SheetTranscriber:
         staff_line_rows = [y for y, black_count in enumerate(row_black_counts) if black_count > staff_line_threshold]
         
         #group consecutive rows into single lines
-        # Example: rows [100,101,102] become single line at y=101
+        #Example: rows [100,101,102] become single line at y=101
         main_staff_lines = []
         if staff_line_rows:
             group_start = staff_line_rows[0]
             prev_y = staff_line_rows[0]
             
             for y in staff_line_rows[1:]:
-                if y - prev_y > 1:  # gap means new line 
-                    
+                if y - prev_y > 1:  # gap means new line    
                     # End current group, save center position
                     center = (group_start + prev_y) // 2
                     main_staff_lines.append(center)
@@ -83,10 +82,9 @@ class SheetTranscriber:
             center = (group_start + prev_y) // 2
             main_staff_lines.append(center)
     
-        pass
+    
         # Create an array of zeros for the full image height
         staff_line_plot = np.zeros(height)
-
         # Mark only the detected staff line positions with their counts
         for y in main_staff_lines:
             staff_line_plot[y] = row_black_counts[y]
