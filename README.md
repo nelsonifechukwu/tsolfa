@@ -15,3 +15,11 @@ scan and see the tonic solfa of any music sheet (that's black and white)
 ## section
 - Train a model: input-> raw music sheet, output->transcribed music sheet
 
+## see these interactions
+- https://breni.xyz/
+- opennote.com 
+- maven.com 
+- https://www.youtube.com/watch?v=akqcQezTZPA 
+- https://board.fun/pages/games 
+
+
