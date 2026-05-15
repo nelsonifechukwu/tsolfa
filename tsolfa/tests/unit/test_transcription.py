@@ -18,7 +18,6 @@ class TestSheetTranscriber:
         assert self.transcriber is not None
         assert isinstance(self.transcriber.preprocessor, SheetPreprocessor)
         assert isinstance(self.transcriber.segmenter, SymbolSegmenter)
-        assert self.transcriber.recognizer is None
         assert self.transcriber.converter is None
     
     @pytest.mark.skip("Implementation pending")

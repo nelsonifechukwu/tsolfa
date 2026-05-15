@@ -23,7 +23,6 @@ class SheetTranscriber:
     def __init__(self):
         self.preprocessor = SheetPreprocessor()
         self.segmenter = SymbolSegmenter()
-        self.recognizer = None
         self.converter = None
 
     def transcribe(self, image_path: str) -> TranscriptionResult:
