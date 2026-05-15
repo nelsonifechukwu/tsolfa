@@ -3,6 +3,7 @@
 import pytest
 from tsolfa.core.transcription import SheetTranscriber, TranscriptionResult
 from tsolfa.vision.preprocessing import SheetPreprocessor
+from tsolfa.vision.segmentation import SymbolSegmenter
 
 
 class TestSheetTranscriber:
@@ -16,7 +17,7 @@ class TestSheetTranscriber:
         """Test transcriber initializes correctly."""
         assert self.transcriber is not None
         assert isinstance(self.transcriber.preprocessor, SheetPreprocessor)
-        assert self.transcriber.segmenter is None
+        assert isinstance(self.transcriber.segmenter, SymbolSegmenter)
         assert self.transcriber.recognizer is None
         assert self.transcriber.converter is None
     
