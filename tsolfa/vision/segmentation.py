@@ -9,6 +9,9 @@ import numpy as np
 class SymbolSegmenter:
     """Segments musical symbols from preprocessed sheet music."""
 
+    def __init__(self, debug: bool = False):
+        self.debug = debug
+
     def detect_note_heads(
         self,
         img_no_lines: np.ndarray,
@@ -46,8 +49,9 @@ class SymbolSegmenter:
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
         img_closed = cv2.morphologyEx(img_inverted, cv2.MORPH_CLOSE, kernel)
 
-        cv2.imshow("After morphological closing", img_closed)
-        cv2.waitKey(0)
+        if self.debug:
+            cv2.imshow("After morphological closing", img_closed)
+            cv2.waitKey(0)
 
         contours, _ = cv2.findContours(img_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         print(f"Total contours found: {len(contours)}")
@@ -79,15 +83,16 @@ class SymbolSegmenter:
 
         note_heads.sort(key=lambda n: n[0])
 
-        vis_img = cv2.cvtColor(img_no_lines, cv2.COLOR_GRAY2BGR)
-        for (cx, cy, w, h) in note_heads:
-            x = cx - w // 2
-            y = cy - h // 2
-            cv2.rectangle(vis_img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        if self.debug:
+            vis_img = cv2.cvtColor(img_no_lines, cv2.COLOR_GRAY2BGR)
+            for (cx, cy, w, h) in note_heads:
+                x = cx - w // 2
+                y = cy - h // 2
+                cv2.rectangle(vis_img, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-        cv2.imshow(f"Detected {len(note_heads)} note heads", vis_img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+            cv2.imshow(f"Detected {len(note_heads)} note heads", vis_img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
 
         print(f"Found {len(note_heads)} note heads")
         return note_heads

@@ -9,6 +9,9 @@ import numpy as np
 class SheetPreprocessor:
     """Preprocesses sheet music images for symbol recognition."""
 
+    def __init__(self, debug: bool = False):
+        self.debug = debug
+
     def binarize(self, image_path: str) -> np.ndarray:
         """Load a grayscale image and apply Otsu thresholding."""
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -67,8 +70,9 @@ class SheetPreprocessor:
         for y_start, y_end in staff_lines:
             img_no_lines[y_start:y_end + 1, :] = 255
 
-        cv2.imshow("Sheet w/o lines", img_no_lines)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        if self.debug:
+            cv2.imshow("Sheet w/o lines", img_no_lines)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
 
         return img_no_lines

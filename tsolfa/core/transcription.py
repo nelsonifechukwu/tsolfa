@@ -20,9 +20,9 @@ class TranscriptionResult:
 class SheetTranscriber:
     """High-performance sheet music to solfa transcriber."""
 
-    def __init__(self):
-        self.preprocessor = SheetPreprocessor()
-        self.segmenter = SymbolSegmenter()
+    def __init__(self, debug: bool = False):
+        self.preprocessor = SheetPreprocessor(debug=debug)
+        self.segmenter = SymbolSegmenter(debug=debug)
         self.converter = None
 
     def transcribe(self, image_path: str) -> TranscriptionResult:
