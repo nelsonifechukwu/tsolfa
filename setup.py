@@ -32,9 +32,4 @@ setup(
         "dev": ["pytest>=6.0", "pytest-cov", "black", "flake8", "mypy", "pre-commit"],
         "ml": ["tensorflow>=2.8.0", "torch>=1.11.0", "torchvision>=0.12.0"],
     },
-    entry_points={
-        "console_scripts": [
-            "tsolfa=tsolfa.cli:main",
-        ],
-    },
 )
