@@ -123,10 +123,4 @@ dmypy.json
 .pyre/
 
 # Project specific
-/data/sheets/*.png
-/data/sheets/*.jpg
-/data/sheets/*.pdf
-/models/*.pkl
-/models/*.h5
-/models/*.pth
 .DS_Store
