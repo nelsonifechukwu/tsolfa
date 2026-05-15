@@ -152,8 +152,3 @@ class MusicalTheory:
             note = each_note[0]
             scale_notes[scale_notes.index(note)] = each_note
         return scale_notes
-
-theory = MusicalTheory()
-for key in KeySignature:
-    minor_key = theory._major_to_minor(key)
-    print(f"{key.value} -> {minor_key}: {theory.get_scale_degrees(key)}")
